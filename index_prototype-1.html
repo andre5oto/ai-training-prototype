@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Skills · Leadership Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Canela+Deck:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy: #1a2744;
+    --navy-mid: #253354;
+    --teal: #00b8a0;
+    --teal-light: #e0f7f4;
+    --amber: #f5a623;
+    --amber-light: #fff8ec;
+    --coral: #f06a5e;
+    --coral-light: #fef1f0;
+    --cream: #faf8f5;
+    --white: #ffffff;
+    --text-dark: #1a2744;
+    --text-mid: #4a5568;
+    --text-soft: #8a96a8;
+    --border: #e8e4df;
+    --shadow-sm: 0 1px 4px rgba(26,39,68,.07);
+    --shadow-md: 0 4px 20px rgba(26,39,68,.10);
+    --shadow-lg: 0 12px 40px rgba(26,39,68,.14);
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    flex-shrink: 0;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 100;
+  }
+  .sidebar-logo {
+    padding: 28px 28px 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--teal);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-mark svg { width: 20px; height: 20px; }
+  .logo-text {
+    font-size: 18px; font-weight: 600; color: #fff; letter-spacing: -.3px;
+  }
+  .logo-sub { font-size: 11px; color: rgba(255,255,255,.45); font-weight: 400; }
+
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+    text-transform: uppercase; color: rgba(255,255,255,.35);
+    padding: 20px 28px 8px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 28px;
+    color: rgba(255,255,255,.6);
+    font-size: 14px; font-weight: 400;
+    cursor: pointer; border-radius: 0;
+    transition: all .2s ease;
+    position: relative;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .nav-item.active {
+    color: #fff; background: rgba(0,184,160,.15);
+    font-weight: 500;
+  }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 24px; background: var(--teal); border-radius: 0 2px 2px 0;
+  }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .nav-badge {
+    margin-left: auto; background: var(--teal);
+    color: #fff; font-size: 11px; font-weight: 600;
+    padding: 1px 8px; border-radius: 20px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 20px 28px 28px;
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+  .user-chip {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #4e9af1, #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #fff; flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 500; color: #fff; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,.4); }
+
+  /* MAIN */
+  .main {
+    margin-left: 260px;
+    flex: 1;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 64px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title {
+    font-size: 16px; font-weight: 600; color: var(--text-dark);
+    flex: 1;
+  }
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--cream); border: 1px solid var(--border);
+    border-radius: 40px; padding: 7px 16px;
+    font-size: 13px; color: var(--text-soft);
+    width: 240px;
+  }
+  .search-bar svg { width: 14px; height: 14px; }
+
+  .notif-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--cream); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative;
+  }
+  .notif-btn svg { width: 16px; height: 16px; }
+  .notif-dot {
+    width: 7px; height: 7px; background: var(--coral);
+    border-radius: 50%; position: absolute; top: 7px; right: 7px;
+    border: 1.5px solid #fff;
+  }
+
+  /* CONTENT */
+  .content { padding: 36px 40px; flex: 1; }
+
+  /* HERO GREETING */
+  .greeting-row {
+    display: flex; align-items: flex-start; gap: 24px;
+    margin-bottom: 32px;
+  }
+  .greeting-text { flex: 1; }
+  .greeting-text h1 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 28px; font-weight: 600; color: var(--text-dark);
+    line-height: 1.25; letter-spacing: -.5px; margin-bottom: 6px;
+  }
+  .greeting-text p {
+    font-size: 14px; color: var(--text-mid); font-weight: 400; line-height: 1.6;
+  }
+  .streak-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--amber-light); border: 1px solid #f5d89d;
+    border-radius: 40px; padding: 8px 16px;
+    font-size: 13px; font-weight: 500; color: #7c5a0a;
+    white-space: nowrap;
+  }
+
+  /* PROGRESS OVERVIEW */
+  .overview-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--white); border-radius: var(--radius);
+    padding: 22px 24px; border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    display: flex; align-items: center; gap: 16px;
+    transition: box-shadow .2s;
+  }
+  .stat-card:hover { box-shadow: var(--shadow-md); }
+  .stat-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 22px;
+  }
+  .stat-icon.teal { background: var(--teal-light); }
+  .stat-icon.amber { background: var(--amber-light); }
+  .stat-icon.coral { background: var(--coral-light); }
+  .stat-label { font-size: 12px; color: var(--text-soft); font-weight: 500; margin-bottom: 3px; }
+  .stat-value { font-size: 24px; font-weight: 700; color: var(--text-dark); letter-spacing: -.5px; }
+  .stat-sub { font-size: 12px; color: var(--text-soft); margin-top: 2px; }
+
+  /* SECTION HEADERS */
+  .section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .section-head h2 {
+    font-size: 18px; font-weight: 600; letter-spacing: -.3px;
+  }
+  .section-head a {
+    font-size: 13px; color: var(--teal); font-weight: 500; cursor: pointer;
+    text-decoration: none;
+  }
+  .section-head a:hover { text-decoration: underline; }
+
+  /* SKILL MODULES GRID */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+
+  .module-card {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+    overflow: hidden; cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+    display: flex; flex-direction: column;
+  }
+  .module-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+  .module-header {
+    height: 110px; position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .module-header-icon { font-size: 42px; }
+  .module-badge {
+    position: absolute; top: 12px; right: 12px;
+    font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .badge-new { background: var(--navy); color: #fff; }
+  .badge-popular { background: var(--teal); color: #fff; }
+  .badge-featured { background: var(--amber); color: #fff; }
+
+  .module-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; }
+  .module-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase;
+    color: var(--text-soft); margin-bottom: 6px;
+  }
+  .module-title {
+    font-size: 15px; font-weight: 600; color: var(--text-dark);
+    line-height: 1.35; margin-bottom: 7px;
+  }
+  .module-desc {
+    font-size: 12px; color: var(--text-mid); line-height: 1.55;
+    flex: 1; margin-bottom: 14px;
+  }
+
+  .progress-bar-wrap {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .progress-bar-bg {
+    flex: 1; height: 5px; background: var(--border); border-radius: 10px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 10px;
+    transition: width .6s ease;
+  }
+  .progress-pct { font-size: 11px; font-weight: 600; color: var(--text-soft); }
+
+  .module-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .module-meta { display: flex; align-items: center; gap: 12px; }
+  .meta-chip {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 11px; color: var(--text-soft); font-weight: 400;
+  }
+  .meta-chip svg { width: 12px; height: 12px; }
+  .cta-btn {
+    font-size: 12px; font-weight: 600;
+    padding: 7px 16px; border-radius: 40px;
+    border: none; cursor: pointer; transition: all .15s;
+    letter-spacing: .2px;
+  }
+  .cta-primary { background: var(--teal); color: #fff; }
+  .cta-primary:hover { background: #009e8a; }
+  .cta-secondary { background: var(--cream); color: var(--text-dark); border: 1px solid var(--border); }
+  .cta-secondary:hover { background: var(--border); }
+
+  /* LESSON PANEL */
+  .lesson-panel {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,.45); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .lesson-panel.open { display: flex; }
+  .lesson-box {
+    background: var(--white); border-radius: 24px;
+    width: 100%; max-width: 700px; max-height: 86vh;
+    overflow-y: auto; box-shadow: var(--shadow-lg);
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp {
+    from { opacity:0; transform: translateY(30px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .lesson-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 16px;
+  }
+  .lesson-icon { font-size: 40px; }
+  .lesson-header-text { flex: 1; }
+  .lesson-header-text h2 { font-size: 22px; font-weight: 700; letter-spacing: -.4px; margin-bottom: 4px; }
+  .lesson-header-text p { font-size: 13px; color: var(--text-mid); }
+  .close-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--cream); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 16px; color: var(--text-soft);
+    flex-shrink: 0; transition: all .15s;
+  }
+  .close-btn:hover { background: var(--border); color: var(--text-dark); }
+
+  .lesson-body { padding: 24px 32px 32px; }
+  .lesson-step {
+    display: none;
+    animation: fadeIn .25s ease;
+  }
+  .lesson-step.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .step-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--teal); margin-bottom: 10px;
+  }
+  .step-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; letter-spacing: -.3px; }
+  .step-body { font-size: 14px; color: var(--text-mid); line-height: 1.7; margin-bottom: 20px; }
+
+  .tip-box {
+    background: var(--teal-light); border-left: 3px solid var(--teal);
+    border-radius: 10px; padding: 14px 16px;
+    font-size: 13px; color: #1a5a52; line-height: 1.6; margin-bottom: 20px;
+  }
+  .tip-box strong { color: #00695c; }
+
+  .prompt-example {
+    background: var(--navy); border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 20px;
+  }
+  .prompt-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 8px; }
+  .prompt-text { font-size: 13px; color: #c8d4e8; line-height: 1.65; font-family: 'DM Sans', monospace; }
+
+  .quiz-question { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border: 1.5px solid var(--border);
+    border-radius: 12px; margin-bottom: 10px; cursor: pointer;
+    font-size: 14px; transition: all .15s;
+  }
+  .quiz-option:hover { border-color: var(--teal); background: var(--teal-light); }
+  .quiz-option.selected { border-color: var(--teal); background: var(--teal-light); }
+  .quiz-option.correct { border-color: #22c55e; background: #f0fdf4; }
+  .quiz-option.wrong { border-color: var(--coral); background: var(--coral-light); }
+  .quiz-radio {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .quiz-option.selected .quiz-radio,
+  .quiz-option.correct .quiz-radio { border-color: var(--teal); background: var(--teal); }
+  .quiz-option.wrong .quiz-radio { border-color: var(--coral); background: var(--coral); }
+  .quiz-radio-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; }
+
+  .lesson-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 20px; border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .step-dots { display: flex; gap: 6px; align-items: center; }
+  .step-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--border);
+    transition: all .2s;
+  }
+  .step-dot.active { background: var(--teal); width: 18px; border-radius: 10px; }
+  .step-dot.done { background: var(--teal); opacity: .5; }
+
+  .btn {
+    padding: 10px 24px; border-radius: 40px; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    transition: all .15s;
+  }
+  .btn-primary { background: var(--teal); color: #fff; }
+  .btn-primary:hover { background: #009e8a; }
+  .btn-ghost { background: transparent; color: var(--text-mid); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--border); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ACTIVITY FEED */
+  .two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 36px; }
+
+  .card {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  }
+  .card-head {
+    padding: 20px 24px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-head h3 { font-size: 15px; font-weight: 600; }
+
+  .activity-list { padding: 12px 24px 20px; }
+  .activity-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .act-icon {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .act-info { flex: 1; }
+  .act-title { font-size: 13px; font-weight: 500; color: var(--text-dark); margin-bottom: 2px; }
+  .act-meta { font-size: 11px; color: var(--text-soft); }
+  .act-time { font-size: 11px; color: var(--text-soft); white-space: nowrap; }
+
+  /* LEADERBOARD */
+  .leader-list { padding: 12px 24px 20px; }
+  .leader-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .leader-item:last-child { border-bottom: none; }
+  .rank { font-size: 13px; font-weight: 700; color: var(--text-soft); width: 20px; text-align: center; flex-shrink: 0; }
+  .rank.top { color: var(--amber); }
+  .leader-name { flex: 1; font-size: 13px; font-weight: 500; }
+  .leader-pts { font-size: 12px; font-weight: 700; color: var(--teal); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    .modules-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .overview-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 800px) {
+    .sidebar { width: 220px; }
+    .main { margin-left: 220px; }
+    .modules-grid { grid-template-columns: 1fr; }
+    .overview-grid { grid-template-columns: repeat(2, 1fr); }
+    .content { padding: 24px 20px; }
+    .topbar { padding: 0 20px; }
+  }
+
+  /* COLOR THEMING PER MODULE */
+  .mh-prompt    { background: linear-gradient(135deg, #e8f4ff 0%, #c8e4ff 100%); }
+  .mh-context   { background: linear-gradient(135deg, #e8f7f4 0%, #c0efe8 100%); }
+  .mh-critique  { background: linear-gradient(135deg, #fff5e8 0%, #fde8c0 100%); }
+  .mh-safety    { background: linear-gradient(135deg, #fef0f0 0%, #fdd8d8 100%); }
+  .mh-workflow  { background: linear-gradient(135deg, #f2e8ff 0%, #e0c8ff 100%); }
+  .mh-strategy  { background: linear-gradient(135deg, #f0f9e0 0%, #d8f0a8 100%); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" fill="white"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">LeadAI</div>
+      <div class="logo-sub">Leadership Academy</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section-label">Navigation</div>
+  <div class="nav-item active" onclick="setNav(this)">
+    <svg viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="2" fill="currentColor"/><rect x="11" y="2" width="7" height="7" rx="2" fill="currentColor" opacity=".5"/><rect x="2" y="11" width="7" height="7" rx="2" fill="currentColor" opacity=".5"/><rect x="11" y="11" width="7" height="7" rx="2" fill="currentColor" opacity=".5"/></svg>
+    Dashboard
+  </div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M4 6h12M4 10h8M4 14h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    My Learning Path
+    <span class="nav-badge">6</span>
+  </div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v5l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Progress
+  </div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 016 6c0 3.3-6 10-6 10S4 11.3 4 8a6 6 0 016-6z" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="8" r="2" fill="currentColor"/></svg>
+    Resources
+  </div>
+
+  <div class="sidebar-section-label">Community</div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 20 20" fill="none"><circle cx="8" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="7" r="3" stroke="currentColor" stroke-width="1.5" opacity=".5"/><path d="M2 17c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    My Team
+  </div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 20 20" fill="none"><path d="M4 15V9l6-5 6 5v6a1 1 0 01-1 1H5a1 1 0 01-1-1z" stroke="currentColor" stroke-width="1.5"/><rect x="8" y="11" width="4" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+    Leaderboard
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="avatar">AL</div>
+      <div class="user-info">
+        <div class="user-name">Alex Doe</div>
+        <div class="user-role">Sr. Manager · Cohort 4</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title">AI Skills for Leaders</div>
+    <div class="search-bar">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#8a96a8" stroke-width="1.5"/><path d="M11 11l3 3" stroke="#8a96a8" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Search modules…
+    </div>
+    <div class="notif-btn">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2a4.5 4.5 0 014.5 4.5c0 3-1 4-1 4H4.5s-1-1-1-4A4.5 4.5 0 018 2z" stroke="#4a5568" stroke-width="1.3"/><path d="M6.5 13a1.5 1.5 0 003 0" stroke="#4a5568" stroke-width="1.3"/></svg>
+      <div class="notif-dot"></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- GREETING -->
+    <div class="greeting-row">
+      <div class="greeting-text">
+        <h1>Good morning, Alex 👋</h1>
+        <p>You're on track with your AI fluency goals. Keep building those skills — your team is counting on you.</p>
+      </div>
+      <div class="streak-chip">🔥 12-day streak</div>
+    </div>
+
+    <!-- STATS -->
+    <div class="overview-grid">
+      <div class="stat-card">
+        <div class="stat-icon teal">🎯</div>
+        <div>
+          <div class="stat-label">Modules Completed</div>
+          <div class="stat-value">4<span style="font-size:14px;color:#8a96a8;font-weight:400;">/10</span></div>
+          <div class="stat-sub">2 in progress</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">⚡</div>
+        <div>
+          <div class="stat-label">AI Fluency Score</div>
+          <div class="stat-value">72</div>
+          <div class="stat-sub">+8 pts this week</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon coral">🏆</div>
+        <div>
+          <div class="stat-label">Team Rank</div>
+          <div class="stat-value">#3</div>
+          <div class="stat-sub">Top 15% of cohort</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULES -->
+    <div class="section-head">
+      <h2>Core AI Skills Modules</h2>
+      <a>View all →</a>
+    </div>
+    <div class="modules-grid">
+
+      <!-- MODULE 1 -->
+      <div class="module-card" onclick="openLesson(0)">
+        <div class="module-header mh-prompt">
+          <div class="module-header-icon">✍️</div>
+          <div class="module-badge badge-popular">Popular</div>
+        </div>
+        <div class="module-body">
+          <div class="module-tag">Foundation</div>
+          <div class="module-title">Prompt Engineering for Leaders</div>
+          <div class="module-desc">Learn to write clear, effective prompts that get AI tools to do exactly what you need.</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:80%;background:var(--teal)"></div></div>
+            <div class="progress-pct">80%</div>
+          </div>
+          <div class="module-footer">
+            <div class="module-meta">
+              <div class="meta-chip"><svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5v3l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> 25 min</div>
+              <div class="meta-chip">⭐ 4.9</div>
+            </div>
+            <button class="cta-btn cta-primary">Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 2 -->
+      <div class="module-card" onclick="openLesson(1)">
+        <div class="module-header mh-context">
+          <div class="module-header-icon">🧠</div>
+          <div class="module-badge badge-featured">Featured</div>
+        </div>
+        <div class="module-body">
+          <div class="module-tag">Intermediate</div>
+          <div class="module-title">Context & Role-Based Prompting</div>
+          <div class="module-desc">Unlock deeper AI output quality by providing rich context and assigning expert roles.</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:40%;background:#3b82f6"></div></div>
+            <div class="progress-pct">40%</div>
+          </div>
+          <div class="module-footer">
+            <div class="module-meta">
+              <div class="meta-chip"><svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5v3l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> 30 min</div>
+              <div class="meta-chip">⭐ 4.8</div>
+            </div>
+            <button class="cta-btn cta-primary">Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 3 -->
+      <div class="module-card" onclick="openLesson(2)">
+        <div class="module-header mh-critique">
+          <div class="module-header-icon">🔍</div>
+          <div class="module-badge badge-new">New</div>
+        </div>
+        <div class="module-body">
+          <div class="module-tag">Intermediate</div>
+          <div class="module-title">Critically Evaluating AI Output</div>
+          <div class="module-desc">Develop the judgment to spot errors, bias, and hallucinations in AI-generated content.</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0%;background:var(--amber)"></div></div>
+            <div class="progress-pct">0%</div>
+          </div>
+          <div class="module-footer">
+            <div class="module-meta">
+              <div class="meta-chip"><svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5v3l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> 20 min</div>
+              <div class="meta-chip">⭐ 4.7</div>
+            </div>
+            <button class="cta-btn cta-secondary">Start</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 4 -->
+      <div class="module-card" onclick="openLesson(3)">
+        <div class="module-header mh-safety">
+          <div class="module-header-icon">🛡️</div>
+        </div>
+        <div class="module-body">
+          <div class="module-tag">Ethics</div>
+          <div class="module-title">AI Safety & Responsible Use</div>
+          <div class="module-desc">Understand the risks, data privacy issues, and ethical guidelines every leader must know.</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:100%;background:#22c55e"></div></div>
+            <div class="progress-pct">✓</div>
+          </div>
+          <div class="module-footer">
+            <div class="module-meta">
+              <div class="meta-chip"><svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5v3l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> 35 min</div>
+              <div class="meta-chip">⭐ 5.0</div>
+            </div>
+            <button class="cta-btn cta-secondary">Review</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 5 -->
+      <div class="module-card" onclick="openLesson(4)">
+        <div class="module-header mh-workflow">
+          <div class="module-header-icon">⚙️</div>
+        </div>
+        <div class="module-body">
+          <div class="module-tag">Advanced</div>
+          <div class="module-title">AI-Augmented Workflows</div>
+          <div class="module-desc">Build repeatable workflows that combine AI tools with your team's existing processes.</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0%;background:#a855f7"></div></div>
+            <div class="progress-pct">0%</div>
+          </div>
+          <div class="module-footer">
+            <div class="module-meta">
+              <div class="meta-chip"><svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5v3l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> 40 min</div>
+              <div class="meta-chip">⭐ 4.6</div>
+            </div>
+            <button class="cta-btn cta-secondary">Start</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 6 -->
+      <div class="module-card" onclick="openLesson(5)">
+        <div class="module-header mh-strategy">
+          <div class="module-header-icon">🎯</div>
+        </div>
+        <div class="module-body">
+          <div class="module-tag">Strategy</div>
+          <div class="module-title">AI Strategy for Your Team</div>
+          <div class="module-desc">Learn how to evaluate, adopt, and champion AI tools at an organizational level.</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0%;background:#10b981"></div></div>
+            <div class="progress-pct">0%</div>
+          </div>
+          <div class="module-footer">
+            <div class="module-meta">
+              <div class="meta-chip"><svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5v3l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> 50 min</div>
+              <div class="meta-chip">⭐ 4.8</div>
+            </div>
+            <button class="cta-btn cta-secondary">Start</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM TWO COL -->
+    <div class="two-col">
+      <!-- ACTIVITY -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Recent Activity</h3>
+          <a style="font-size:12px;color:var(--teal);cursor:pointer;font-weight:500;">See all</a>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="act-icon" style="background:var(--teal-light)">✅</div>
+            <div class="act-info">
+              <div class="act-title">Completed: AI Safety & Responsible Use</div>
+              <div class="act-meta">Module 4 · Certificate earned</div>
+            </div>
+            <div class="act-time">2h ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon" style="background:#f2e8ff">🧩</div>
+            <div class="act-info">
+              <div class="act-title">Quiz passed: Prompt Foundations</div>
+              <div class="act-meta">Score: 92% · +12 pts</div>
+            </div>
+            <div class="act-time">Yesterday</div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon" style="background:var(--amber-light)">🔥</div>
+            <div class="act-info">
+              <div class="act-title">Streak milestone: 10 days</div>
+              <div class="act-meta">Achievement unlocked</div>
+            </div>
+            <div class="act-time">2 days ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon" style="background:var(--teal-light)">📖</div>
+            <div class="act-info">
+              <div class="act-title">Started: Context & Role-Based Prompting</div>
+              <div class="act-meta">Module 2 · 40% complete</div>
+            </div>
+            <div class="act-time">3 days ago</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Cohort Leaderboard</h3>
+        </div>
+        <div class="leader-list">
+          <div class="leader-item">
+            <div class="rank top">🥇</div>
+            <div class="avatar" style="width:28px;height:28px;font-size:10px;background:linear-gradient(135deg,#f5a623,#e55c00)">JR</div>
+            <div class="leader-name">Jordan R.</div>
+            <div class="leader-pts">940 pts</div>
+          </div>
+          <div class="leader-item">
+            <div class="rank top">🥈</div>
+            <div class="avatar" style="width:28px;height:28px;font-size:10px;background:linear-gradient(135deg,#64b5f6,#1565c0)">MP</div>
+            <div class="leader-name">Maya P.</div>
+            <div class="leader-pts">885 pts</div>
+          </div>
+          <div class="leader-item" style="background:var(--teal-light);border-radius:10px;padding:8px 10px;margin:-2px -4px;">
+            <div class="rank top">🥉</div>
+            <div class="avatar" style="width:28px;height:28px;font-size:10px;background:linear-gradient(135deg,#4e9af1,#a855f7)">AL</div>
+            <div class="leader-name" style="font-weight:700">You (Alex D.)</div>
+            <div class="leader-pts">820 pts</div>
+          </div>
+          <div class="leader-item">
+            <div class="rank">4</div>
+            <div class="avatar" style="width:28px;height:28px;font-size:10px;background:linear-gradient(135deg,#a8e063,#56ab2f)">SK</div>
+            <div class="leader-name">Sam K.</div>
+            <div class="leader-pts">790 pts</div>
+          </div>
+          <div class="leader-item">
+            <div class="rank">5</div>
+            <div class="avatar" style="width:28px;height:28px;font-size:10px;background:linear-gradient(135deg,#f093fb,#f5576c)">TC</div>
+            <div class="leader-name">Taylor C.</div>
+            <div class="leader-pts">745 pts</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- LESSON MODAL -->
+<div class="lesson-panel" id="lessonPanel" onclick="panelOutsideClick(event)">
+  <div class="lesson-box" id="lessonBox">
+    <div class="lesson-header">
+      <div class="lesson-icon" id="lessonIcon">✍️</div>
+      <div class="lesson-header-text">
+        <h2 id="lessonTitle">Prompt Engineering for Leaders</h2>
+        <p id="lessonSub">Foundation · 25 min · 4 steps</p>
+      </div>
+      <div class="close-btn" onclick="closeLesson()">✕</div>
+    </div>
+    <div class="lesson-body">
+      <div id="stepsContainer"></div>
+      <div class="lesson-nav">
+        <button class="btn btn-ghost" id="prevBtn" onclick="changeStep(-1)">← Back</button>
+        <div class="step-dots" id="stepDots"></div>
+        <button class="btn btn-primary" id="nextBtn" onclick="changeStep(1)">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const lessons = [
+  {
+    icon: "✍️", title: "Prompt Engineering for Leaders", sub: "Foundation · 25 min · 4 steps",
+    steps: [
+      {
+        label: "Step 1 of 4", title: "What Is a Prompt?",
+        body: "A prompt is any instruction, question, or input you give an AI model. The quality of the AI's output depends almost entirely on the quality of your prompt. Think of it like giving instructions to a brilliant but literal-minded new hire — vague instructions yield vague results.",
+        tip: "<strong>Key insight:</strong> AI models don't read your mind. Every assumption you leave unstated is a chance for misunderstanding. Be explicit about format, length, tone, and goal.",
+        type: "content"
+      },
+      {
+        label: "Step 2 of 4", title: "The Anatomy of a Great Prompt",
+        body: "Every high-quality prompt has four core elements: a <strong>task</strong> (what you want), <strong>context</strong> (background the AI needs), <strong>format</strong> (how you want the output), and <strong>constraints</strong> (what to avoid or include). Most bad prompts are missing at least two of these.",
+        promptExample: { label: "Example Prompt", text: 'Write a 3-paragraph executive summary of our Q2 performance for a board audience. Focus on revenue growth, key risks, and strategic wins. Use plain language — no jargon. Include a one-sentence action recommendation at the end.' },
+        type: "content"
+      },
+      {
+        label: "Step 3 of 4", title: "Iteration: The Secret Weapon",
+        body: "Expert AI users don't write perfect prompts on the first try. They iterate. Start broad, review the output, then refine. Add constraints where the AI went off-track. Ask it to regenerate with adjustments. This \"prompt loop\" typically produces dramatically better results in 2–3 rounds.",
+        tip: "<strong>Pro tip:</strong> If you're unhappy with an output, don't start over — tell the AI exactly what's wrong. \"Make it shorter,\" \"use a more confident tone,\" or \"add a concrete example\" are all highly effective follow-up prompts.",
+        type: "content"
+      },
+      {
+        label: "Knowledge Check", title: "Quick Quiz",
+        question: "Which element is MOST commonly missing from ineffective prompts?",
+        options: ["The task description", "The desired output format", "A deadline for the AI", "The word 'please'"],
+        correct: 1,
+        type: "quiz"
+      }
+    ]
+  },
+  {
+    icon: "🧠", title: "Context & Role-Based Prompting", sub: "Intermediate · 30 min · 4 steps",
+    steps: [
+      {
+        label: "Step 1 of 4", title: "Why Context Changes Everything",
+        body: "AI models are trained on enormous amounts of text, which means they can adopt many personas and areas of expertise. When you provide rich context, you activate the most relevant 'knowledge mode' in the model — leading to more nuanced, accurate, and useful output.",
+        tip: "<strong>Think of it this way:</strong> The same question answered by a junior analyst vs. a seasoned CFO will look very different. You can invoke that CFO-level thinking just by telling the AI to take that perspective.",
+        type: "content"
+      },
+      {
+        label: "Step 2 of 4", title: "Assigning an Expert Role",
+        body: "One of the most powerful prompting techniques is asking the AI to respond as a specific type of expert. This shifts the vocabulary, depth, and frame of reference of the entire response. Combine role assignment with task description for maximum impact.",
+        promptExample: { label: "Role-Based Prompt", text: 'You are a senior organizational change consultant with 20 years of experience leading digital transformations at Fortune 500 companies. Advise me on the top 3 risks when rolling out AI tools to a skeptical frontline team, and how to mitigate each.' },
+        type: "content"
+      },
+      {
+        label: "Step 3 of 4", title: "Layering Context for Depth",
+        body: "Beyond role, you can layer in organizational context (company size, industry, current challenges), audience context (who will read this), and situational context (what decision this informs). The more relevant context you provide, the less generic the output will be.",
+        tip: "<strong>Leader application:</strong> Before your next 1:1 prep, try: \"You are an executive coach. My direct report struggles with delegation. Our team is under deadline pressure. Give me 3 coaching questions to open a productive conversation.\"",
+        type: "content"
+      },
+      {
+        label: "Knowledge Check", title: "Quick Quiz",
+        question: "What is the PRIMARY benefit of assigning a role in your prompt?",
+        options: ["The AI responds faster", "It shifts vocabulary, depth, and framing toward relevant expertise", "It prevents the AI from making up information", "It makes the response shorter"],
+        correct: 1,
+        type: "quiz"
+      }
+    ]
+  },
+  {
+    icon: "🔍", title: "Critically Evaluating AI Output", sub: "Intermediate · 20 min · 4 steps",
+    steps: [
+      {
+        label: "Step 1 of 4", title: "The Hallucination Problem",
+        body: "AI models sometimes 'hallucinate' — they generate confident-sounding content that is factually wrong. This happens because they predict plausible text rather than look up facts. As a leader, you are responsible for what you act on or share, regardless of source.",
+        tip: "<strong>Critical rule:</strong> Never use AI-generated facts, statistics, quotes, or citations without independently verifying them. The more specific a claim, the higher the risk it's fabricated.",
+        type: "content"
+      },
+      {
+        label: "Step 2 of 4", title: "A 4-Point Evaluation Framework",
+        body: "When reviewing AI output, ask four questions: (1) <strong>Accuracy</strong> — are the facts verifiable? (2) <strong>Completeness</strong> — is anything important missing? (3) <strong>Bias</strong> — does this reflect a skewed perspective? (4) <strong>Fit</strong> — does this actually answer your original question? Many outputs pass on one or two dimensions but fail the others.",
+        type: "content"
+      },
+      {
+        label: "Step 3 of 4", title: "Spotting Confident-Sounding Nonsense",
+        body: "AI outputs that contain specific numbers, named experts, dated studies, or detailed processes are highest risk for hallucination. Red flags include highly precise statistics ('studies show 73.2% of employees…'), references to specific papers or people, and advice that sounds surprisingly perfect for your exact situation.",
+        tip: "<strong>Practical move:</strong> When the AI gives you a statistic or study, type it into Google. If you can't verify it within 60 seconds, treat it as unverified. Never present AI-generated data to your team as fact.",
+        type: "content"
+      },
+      {
+        label: "Knowledge Check", title: "Quick Quiz",
+        question: "Which type of AI output requires the MOST careful fact-checking?",
+        options: ["A list of brainstorming ideas", "A rewrite of text you provided", "Specific statistics, citations, and named expert quotes", "A summary of a document you uploaded"],
+        correct: 2,
+        type: "quiz"
+      }
+    ]
+  },
+  {
+    icon: "🛡️", title: "AI Safety & Responsible Use", sub: "Ethics · 35 min · 4 steps",
+    steps: [
+      {
+        label: "Step 1 of 4", title: "Data Privacy Essentials",
+        body: "Many AI tools send your input to third-party servers and may use it for model training. This means confidential business information, customer data, employee records, and proprietary strategy should never be pasted into a public AI tool without understanding the data policy.",
+        tip: "<strong>Your responsibility:</strong> Before using AI with any sensitive data, check: (1) Does your company have an approved AI tool? (2) Does the tool have a business/enterprise data agreement? (3) Is what you're entering covered under that agreement?",
+        type: "content"
+      },
+      {
+        label: "Step 2 of 4", title: "Bias in AI Systems",
+        body: "AI models learn from historical data, which often reflects societal biases around gender, race, geography, and more. This can surface in hiring suggestions, performance evaluations, or communications if AI output is used without scrutiny. Leaders have an amplifying effect — biased AI output they share becomes their team's reality.",
+        type: "content"
+      },
+      {
+        label: "Step 3 of 4", title: "Setting the Right Norms for Your Team",
+        body: "As a leader, your team will mirror your AI behavior. If you use AI carelessly, they will too. Establish clear norms: what tools are approved, what data can be used, how to label AI-assisted work, and when human judgment is required before acting on AI output. Publish these and model them yourself.",
+        tip: "<strong>Starter norm to adopt:</strong> 'AI can draft it; a human must own it.' This one rule prevents most accountability problems that arise from AI-assisted work.",
+        type: "content"
+      },
+      {
+        label: "Knowledge Check", title: "Quick Quiz",
+        question: "What is the safest policy for handling confidential data with AI tools?",
+        options: ["Use any AI tool, but delete the chat afterward", "Only use AI tools approved by your company's IT/security team with enterprise data agreements", "Summarize the data first so the AI doesn't see the raw version", "Trust AI providers' privacy policies without reading them"],
+        correct: 1,
+        type: "quiz"
+      }
+    ]
+  },
+  {
+    icon: "⚙️", title: "AI-Augmented Workflows", sub: "Advanced · 40 min · 4 steps",
+    steps: [
+      {
+        label: "Step 1 of 4", title: "From One-Off Prompts to Repeatable Systems",
+        body: "Most leaders use AI reactively — when stuck, they try a prompt. True leverage comes from designing repeatable AI workflows for your most time-consuming tasks: weekly reports, meeting summaries, performance feedback drafts, email triage, and research synthesis.",
+        tip: "<strong>Start here:</strong> Identify one recurring task that takes 30+ minutes. Map the steps. Then identify which steps are information-assembly (AI can help) vs. judgment (you must lead).",
+        type: "content"
+      },
+      {
+        label: "Step 2 of 4", title: "The Prompt Template Library",
+        body: "Build a personal library of prompt templates for your recurring tasks. A prompt template is a reusable structure with placeholders you fill in each time. Teams that share prompt libraries report 40–60% faster AI-assisted work compared to individuals who start from scratch each session.",
+        promptExample: { label: "Template Example", text: '[ROLE]: You are a business writing coach.\n[TASK]: Rewrite the following email to be more concise and direct for a senior executive audience.\n[INPUT]: {paste email here}\n[FORMAT]: Preserve key information. Target 30% shorter. Keep a professional but warm tone.' },
+        type: "content"
+      },
+      {
+        label: "Step 3 of 4", title: "Designing Human-AI Handoffs",
+        body: "The most robust workflows define clear handoff points: when AI does the work, and when a human takes over. Good handoff design means the human's time is spent on judgment, approval, and relationship — not on formatting and first drafts. Document these handoffs so they can be delegated and taught to your team.",
+        tip: "<strong>Design principle:</strong> AI handles the 'blank page problem.' Humans handle the 'is this right for our situation?' problem. Design your workflows around this division of labor.",
+        type: "content"
+      },
+      {
+        label: "Knowledge Check", title: "Quick Quiz",
+        question: "What is the BIGGEST advantage of a shared team prompt library?",
+        options: ["Everyone uses AI exactly the same way", "It reduces the time spent starting prompts from scratch and spreads best practices", "It eliminates the need to review AI outputs", "It ensures the AI never makes mistakes"],
+        correct: 1,
+        type: "quiz"
+      }
+    ]
+  },
+  {
+    icon: "🎯", title: "AI Strategy for Your Team", sub: "Strategy · 50 min · 4 steps",
+    steps: [
+      {
+        label: "Step 1 of 4", title: "Evaluating AI Tools as a Leader",
+        body: "The AI tools landscape changes rapidly. Your role isn't to evaluate every new tool — it's to develop a decision framework. Good evaluation criteria include: data security, integration with existing systems, user adoption curve, ROI evidence, and alignment with your team's actual bottlenecks.",
+        tip: "<strong>Red flag:</strong> Vendors who can't clearly explain their data privacy model or who can't show you real ROI evidence from comparable teams should be scrutinized carefully.",
+        type: "content"
+      },
+      {
+        label: "Step 2 of 4", title: "Managing Resistance to AI Adoption",
+        body: "Team members often resist AI tools out of fear (job loss), skepticism (it won't work here), or habit (our current process is fine). Effective leaders address these through transparency, inclusion in the pilot design, early wins with visible impact, and clear communication about what AI does — and doesn't — mean for roles.",
+        promptExample: { label: "AI-Assist: Draft a Change Communication", text: 'Help me write a 3-paragraph message to my team introducing a new AI writing tool. Acknowledge that change is hard, explain why we\'re adopting it, and describe what training support they\'ll receive. Tone: encouraging and transparent. Audience: a 12-person operations team.' },
+        type: "content"
+      },
+      {
+        label: "Step 3 of 4", title: "Building an AI-Ready Team Culture",
+        body: "AI fluency is now a core leadership competency. Teams with high AI fluency — where members experiment, share learnings, and iterate together — significantly outperform those where AI is siloed to a few power users. As a leader, you can cultivate this culture by making AI experimentation safe, celebrating creative applications, and dedicating team time to shared learning.",
+        tip: "<strong>Easy win:</strong> Start a weekly 5-minute 'AI share' in your team meeting — one person shares a prompt or workflow that saved them time. This single habit dramatically accelerates team-wide fluency.",
+        type: "content"
+      },
+      {
+        label: "Knowledge Check", title: "Quick Quiz",
+        question: "What is the MOST effective way to combat AI adoption resistance on your team?",
+        options: ["Mandate use with clear consequences", "Include skeptics in the pilot design and show early visible wins", "Explain that AI is the future and resistance is futile", "Have the IT team enforce tool usage"],
+        correct: 1,
+        type: "quiz"
+      }
+    ]
+  }
+];
+
+let currentLesson = 0;
+let currentStep = 0;
+let selectedOption = null;
+
+function setNav(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function openLesson(idx) {
+  currentLesson = idx;
+  currentStep = 0;
+  selectedOption = null;
+  renderLesson();
+  document.getElementById('lessonPanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLesson() {
+  document.getElementById('lessonPanel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function panelOutsideClick(e) {
+  if (e.target === document.getElementById('lessonPanel')) closeLesson();
+}
+
+function renderLesson() {
+  const L = lessons[currentLesson];
+  document.getElementById('lessonIcon').textContent = L.icon;
+  document.getElementById('lessonTitle').textContent = L.title;
+  document.getElementById('lessonSub').textContent = L.sub;
+
+  const container = document.getElementById('stepsContainer');
+  container.innerHTML = '';
+
+  L.steps.forEach((step, i) => {
+    const div = document.createElement('div');
+    div.className = 'lesson-step' + (i === currentStep ? ' active' : '');
+    div.id = 'step-' + i;
+
+    if (step.type === 'content') {
+      let html = `<div class="step-label">${step.label}</div><div class="step-title">${step.title}</div><div class="step-body">${step.body}</div>`;
+      if (step.tip) html += `<div class="tip-box">${step.tip}</div>`;
+      if (step.promptExample) html += `<div class="prompt-example"><div class="prompt-label">${step.promptExample.label}</div><div class="prompt-text">${step.promptExample.text.replace(/\n/g,'<br>')}</div></div>`;
+      div.innerHTML = html;
+    } else if (step.type === 'quiz') {
+      let opts = step.options.map((o, oi) => `
+        <div class="quiz-option" id="opt-${i}-${oi}" onclick="selectOption(${i},${oi},${step.correct})">
+          <div class="quiz-radio"><div class="quiz-radio-dot"></div></div>
+          <span>${o}</span>
+        </div>`).join('');
+      div.innerHTML = `<div class="step-label">${step.label}</div><div class="step-title">${step.title}</div><div class="quiz-question">${step.question}</div>${opts}`;
+    }
+
+    container.appendChild(div);
+  });
+
+  renderDots();
+  updateNav();
+}
+
+function renderDots() {
+  const L = lessons[currentLesson];
+  const dots = document.getElementById('stepDots');
+  dots.innerHTML = L.steps.map((_, i) => {
+    let cls = i === currentStep ? 'active' : (i < currentStep ? 'done' : '');
+    return `<div class="step-dot ${cls}"></div>`;
+  }).join('');
+}
+
+function updateNav() {
+  const L = lessons[currentLesson];
+  const prev = document.getElementById('prevBtn');
+  const next = document.getElementById('nextBtn');
+  prev.disabled = currentStep === 0;
+  const isLast = currentStep === L.steps.length - 1;
+  next.textContent = isLast ? '🎉 Complete' : 'Next →';
+}
+
+function changeStep(dir) {
+  const L = lessons[currentLesson];
+  const newStep = currentStep + dir;
+  if (newStep < 0) return;
+  if (newStep >= L.steps.length) { closeLesson(); return; }
+  document.getElementById('step-' + currentStep)?.classList.remove('active');
+  currentStep = newStep;
+  document.getElementById('step-' + currentStep)?.classList.add('active');
+  selectedOption = null;
+  renderDots();
+  updateNav();
+}
+
+function selectOption(stepIdx, optIdx, correct) {
+  if (selectedOption !== null) return;
+  selectedOption = optIdx;
+  const L = lessons[currentLesson];
+  const step = L.steps[stepIdx];
+  for (let i = 0; i < step.options.length; i++) {
+    const el = document.getElementById(`opt-${stepIdx}-${i}`);
+    if (!el) continue;
+    el.classList.remove('selected');
+    if (i === optIdx) { el.classList.add(optIdx === correct ? 'correct' : 'wrong'); }
+    else if (i === correct && optIdx !== correct) { el.classList.add('correct'); }
+  }
+}
+</script>
+</body>
+</html>
