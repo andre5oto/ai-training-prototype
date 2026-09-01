@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approval Flow &mdash; workflow state prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14203A; --ink-soft:#3A465E; --paper:#FBFAF7; --card:#FFFFFF;
+  --rule:#E2DED5; --rule-strong:#C9C4B7; --muted:#6E7686;
+  --cleared:#2F6F53; --cleared-bg:#EAF3EE;
+  --waiting:#B0741F; --waiting-bg:#FBF2E3;
+  --blocked:#A4392F; --blocked-bg:#FAEBE8;
+  --agent:#5B4B9C; --agent-bg:#F0EDF8;
+  --skipped:#8A8F9C; --skipped-bg:#F1F1EE;
+  --note:#8C5A1E; --note-bg:#FDF6E7;
+  --slack:#1F6B5C;
+  --r:10px; --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:"DM Sans",system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;font-size:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--agent);outline-offset:2px;border-radius:4px}
+
+.masthead{border-bottom:1px solid var(--rule);background:var(--card)}
+.mast-in{max-width:1220px;margin:0 auto;padding:18px 28px 0}
+.mast-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:23px;font-weight:700;letter-spacing:-.02em;margin:4px 0 2px}
+.sub{color:var(--muted);font-size:13.5px;margin:0}
+.mast-meta{display:flex;gap:26px;flex-wrap:wrap}
+.meta b{display:block;font-family:var(--mono);font-size:15px;font-weight:500}
+.meta span{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+
+.meter-wrap{max-width:1220px;margin:0 auto;padding:18px 28px 20px}
+.meter-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.meter-head h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0}
+.meter-head .verdict{font-family:var(--mono);font-size:12.5px}
+.meter{display:flex;height:26px;border-radius:5px;overflow:hidden;border:1px solid var(--rule-strong);background:var(--card)}
+.seg{position:relative;transition:flex-grow .45s ease;min-width:2px}
+.seg span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10.5px;color:#fff;opacity:0;transition:opacity .2s;white-space:nowrap;pointer-events:none}
+.seg:hover span,.seg.wide span{opacity:1}
+.meter-axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px}
+.bench{position:relative;height:0}
+.bench i{position:absolute;top:-33px;width:2px;height:32px;background:var(--ink);font-style:normal}
+.bench i::after{content:attr(data-l);position:absolute;top:-15px;left:4px;font-family:var(--mono);font-size:10.5px;color:var(--ink);white-space:nowrap}
+
+.wrap{max-width:1220px;margin:0 auto;padding:22px 28px 60px;display:grid;grid-template-columns:1fr 410px;gap:26px;align-items:start}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:var(--r)}
+.panel-h{padding:13px 18px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.panel-h h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0}
+
+.spine{padding:6px 18px 18px}
+.node{position:relative;padding:16px 0 16px 40px;border:0;background:none;text-align:left;width:100%;display:block;color:inherit}
+.node::before{content:"";position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--rule-strong)}
+.node:first-child::before{top:26px}
+.node:last-child::before{bottom:calc(100% - 26px)}
+.node.seg-cleared::before{background:var(--cleared)}
+.node.seg-agent::before{background:var(--agent)}
+.node.seg-blocked::before{background:var(--blocked);width:4px;left:10px}
+.node.seg-dashed::before{background:repeating-linear-gradient(to bottom,var(--rule-strong) 0 5px,transparent 5px 10px)}
+.dot{position:absolute;left:4px;top:19px;width:16px;height:16px;border-radius:50%;background:var(--card);border:2px solid var(--rule-strong);z-index:1;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700}
+.dot.cleared{background:var(--cleared);border-color:var(--cleared)}
+.dot.escalated{background:var(--agent);border-color:var(--agent)}
+.dot.blocked{background:var(--blocked);border-color:var(--blocked)}
+.dot.review{background:var(--waiting);border-color:var(--waiting)}
+.dot.skipped{background:var(--skipped);border-color:var(--skipped)}
+.node-top{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.node-name{font-weight:500;font-size:15px}
+.node-owner{color:var(--muted);font-size:13px;margin-top:2px;display:block}
+.dur{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap}
+.dur.hot{color:var(--blocked);font-weight:500}
+.pill{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;padding:2.5px 7px;border-radius:4px;margin-top:8px}
+.p-cleared{background:var(--cleared-bg);color:var(--cleared)}
+.p-escalated{background:var(--agent-bg);color:var(--agent)}
+.p-blocked{background:var(--blocked-bg);color:var(--blocked)}
+.p-review{background:var(--waiting-bg);color:var(--waiting)}
+.p-skipped{background:var(--skipped-bg);color:var(--skipped)}
+.p-pending{background:#F4F3EF;color:var(--muted)}
+.node:hover{background:#FAF9F6}
+.node.sel{background:#F5F7FB}
+.node.sel .node-name{color:var(--agent)}
+
+.insp{padding:18px}
+.insp h3{margin:0 0 3px;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.insp .who{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.kv{display:grid;grid-template-columns:104px 1fr;gap:7px 12px;font-size:13.5px;margin-bottom:14px}
+.kv dt{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding-top:2px}
+.kv dd{margin:0;font-family:var(--mono);font-size:13px}
+.reason{border-left:3px solid var(--rule-strong);padding:9px 0 9px 13px;font-size:13.5px;margin-bottom:14px;color:var(--ink-soft)}
+.reason.block{border-color:var(--blocked);background:var(--blocked-bg);border-radius:0 6px 6px 0;padding-right:12px}
+.reason.agent{border-color:var(--agent);background:var(--agent-bg);border-radius:0 6px 6px 0;padding-right:12px}
+.reason strong{display:block;color:var(--ink);margin-bottom:3px;font-size:12.5px}
+.rule-id{font-family:var(--mono);font-size:11.5px;color:var(--agent);margin-top:6px;display:block}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.btn{background:var(--card);border:1px solid var(--rule-strong);color:var(--ink);padding:7px 13px;border-radius:6px;font-size:13.5px;transition:.14s}
+.btn:hover{border-color:var(--ink);background:#F7F6F2}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.pri:hover{background:#0C1527}
+.btn.ai{background:var(--agent);border-color:var(--agent);color:#fff}
+.btn.ai:hover{background:#4A3C84}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.empty{color:var(--muted);font-size:13.5px;padding:8px 0}
+
+/* ---- AI assist ---- */
+.ai-box{margin-top:16px;border:1px solid var(--agent);border-radius:8px;overflow:hidden}
+.ai-h{background:var(--agent-bg);padding:9px 13px;display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--agent);font-family:var(--mono)}
+.ai-h .dotpulse{width:7px;height:7px;border-radius:50%;background:var(--agent);flex:none}
+.ai-body{padding:12px 13px}
+.ai-q{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--rule-strong);border-radius:6px;padding:7px 11px;font-size:13.5px;margin-bottom:7px;color:var(--ink)}
+.ai-q:hover{border-color:var(--agent);color:var(--agent)}
+.ai-q{position:relative;padding-right:30px}
+.ai-q::after{content:"\203A";position:absolute;right:12px;top:50%;transform:translateY(-50%) rotate(90deg);transition:transform .18s;color:var(--muted);font-size:15px;line-height:0}
+.ai-q.open::after{transform:translateY(-50%) rotate(-90deg)}
+.ai-q.open{border-color:var(--agent);color:var(--agent)}
+.ai-row+.ai-row{margin-top:7px}
+.ai-row .ai-ans{padding:9px 2px 2px}
+.acts-ai{margin:9px 0 2px}
+.btn.spent{opacity:.6}
+.receipt{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:7px 0 0}
+.notice{font-size:13px;line-height:1.5;color:var(--cleared);background:var(--cleared-bg);border-left:3px solid var(--cleared);border-radius:0 6px 6px 0;padding:9px 12px;margin:8px 0 0}
+.ai-ans{font-size:13.5px;line-height:1.55;color:var(--ink-soft)}
+.ai-ans .ln{opacity:0;animation:fade .32s ease forwards}
+@keyframes fade{to{opacity:1}}
+.ai-ans p{margin:0 0 8px}
+.ai-ans .cite{font-family:var(--mono);font-size:11.5px;color:var(--agent);display:block;margin-top:-3px;margin-bottom:9px}
+.thinking{font-family:var(--mono);font-size:12px;color:var(--agent)}
+.thinking::after{content:"";animation:dots 1.1s steps(4,end) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+/* ---- slack sheet ---- */
+.veil{position:fixed;inset:0;background:rgba(20,32,58,.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.veil.on{display:flex}
+.sheet{background:var(--card);border-radius:12px;width:min(520px,100%);box-shadow:0 18px 50px rgba(20,32,58,.28);overflow:hidden}
+.sheet-h{padding:14px 18px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center}
+.sheet-h h3{margin:0;font-size:15px;font-weight:700}
+.sheet-h .chan{font-family:var(--mono);font-size:12.5px;color:var(--slack)}
+.sheet-b{padding:16px 18px}
+.msg{background:#F7F6F2;border:1px solid var(--rule);border-radius:8px;padding:12px 13px;font-size:13.5px;line-height:1.55;white-space:pre-wrap}
+.msg .mention{color:var(--slack);font-weight:500}
+.urg{display:flex;align-items:flex-start;gap:10px;margin-top:14px;padding:11px 13px;border:1px solid var(--rule-strong);border-radius:8px;cursor:pointer;transition:.15s}
+.urg.on{border-color:var(--blocked);background:var(--blocked-bg)}
+.urg .switch{width:34px;height:19px;border-radius:10px;background:var(--rule-strong);position:relative;transition:.18s;flex:none;margin-top:1px}
+.urg .switch::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:.18s}
+.urg.on .switch{background:var(--blocked)}
+.urg.on .switch::after{transform:translateX(15px)}
+.urg b{display:block;font-size:13.5px;font-weight:500}
+.urg small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.quota{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:9px}
+.quota.hot{color:var(--blocked)}
+.sheet-f{padding:13px 18px;border-top:1px solid var(--rule);display:flex;justify-content:flex-end;gap:8px}
+
+.log{max-height:300px;overflow-y:auto;padding:4px 18px 16px}
+.entry{display:grid;grid-template-columns:62px 1fr;gap:11px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.entry:last-child{border-bottom:0}
+.entry time{font-family:var(--mono);font-size:11px;color:var(--muted);padding-top:2px}
+.entry p{margin:0;font-size:13.5px;line-height:1.45}
+.entry .actor{font-weight:500}
+.entry .actor.bot{color:var(--agent)}
+.entry small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.tag{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:1.5px 5px;border-radius:3px;margin-left:6px;vertical-align:1px}
+.tag.auto{background:var(--agent-bg);color:var(--agent)}
+.tag.assist{background:var(--card);color:var(--agent);border:1px solid var(--agent)}
+.entry.fresh{animation:in .4s ease}
+@keyframes in{from{opacity:0;transform:translateY(-5px)}to{opacity:1}}
+
+.toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none}
+.switch{width:34px;height:19px;border-radius:10px;background:var(--rule-strong);position:relative;transition:.18s;flex:none}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:.18s}
+.toggle.on .switch{background:var(--note)}
+.toggle.on .switch::after{transform:translateX(15px)}
+.pnote{display:none;background:var(--note-bg);border:1px solid #EBD9B4;border-left:3px solid var(--note);border-radius:0 6px 6px 0;padding:10px 13px;margin:10px 0 0;font-size:13px;line-height:1.5;color:#5C3E13}
+.pnote b{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;color:var(--note)}
+body.notes .pnote{display:block}
+
+footer{max-width:1220px;margin:0 auto;padding:0 28px 46px;color:var(--muted);font-size:12.5px;line-height:1.6}
+footer a{color:var(--ink)}
+
+@media (max-width:940px){
+  .wrap{grid-template-columns:1fr;padding:18px}
+  .mast-in,.meter-wrap{padding-left:18px;padding-right:18px}
+  footer{padding-left:18px;padding-right:18px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.ai-ans .ln{opacity:1}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="mast-in">
+    <div class="mast-top">
+      <div>
+        <div class="eyebrow">Agreement &middot; in flight</div>
+        <h1>Master Services Agreement</h1>
+        <p class="sub">Redline Analytics Inc. &middot; renewal &middot; requested by Dana Whitfield, Procurement</p>
+      </div>
+      <div class="mast-meta">
+        <div class="meta"><b>$184,000</b><span>Annual value</span></div>
+        <div class="meta"><b>MSA-2291</b><span>Record</span></div>
+        <div class="meta"><b id="mDays">14d</b><span>In flight</span></div>
+        <div class="meta"><b id="mStage">Blocked</b><span>Status</span></div>
+
+      </div>
+    </div>
+  </div>
+  <div class="meter-wrap">
+    <div class="meter-head">
+      <h2>Where the time went</h2>
+      <div class="verdict" id="verdict"></div>
+    </div>
+    <div class="bench"><i id="benchMark" data-l="9d median"></i></div>
+    <div class="meter" id="meter"></div>
+    <div class="meter-axis"><span>Intake &middot; Aug 14</span><span id="axisEnd">Today &middot; day 14</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <main class="panel">
+    <div class="panel-h">
+      <h2>Approval chain</h2>
+      <label class="toggle" id="notesToggle" tabindex="0" role="switch" aria-checked="false">
+        <span class="switch"></span> Product notes
+      </label>
+    </div>
+    <div class="spine" id="spine"></div>
+    <div style="padding:0 18px 18px">
+      <div class="pnote">
+        <b>Why a spine and not a table</b>
+        A table answers "what is the status of each step." The question people actually arrive
+        with is "why is this not done yet," which lives in the gaps between steps, not in the
+        steps. The connector carries the wait, so the delay is the thickest, reddest thing on
+        screen before anyone reads a word.
+      </div>
+    </div>
+  </main>
+
+  <aside>
+    <section class="panel" style="margin-bottom:20px">
+      <div class="panel-h"><h2>Inspector</h2><button class="btn" id="reset" style="padding:4px 10px;font-size:12.5px">Reset the session</button></div>
+      <div class="insp" id="insp"></div>
+    </section>
+    <section class="panel">
+      <div class="panel-h"><h2>Audit history</h2><span class="dur" id="logCount"></span></div>
+      <div class="log" id="log"></div>
+      <div style="padding:0 18px 16px">
+        <div class="pnote">
+          <b>Three actors, not two</b>
+          A human action, an agent acting on its own, and a human acting on an agent's
+          recommendation are three different things, and six months later in a renewal
+          negotiation the difference is the whole argument. They get three different markers
+          here rather than collapsing into "system."
+        </div>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<div class="veil" id="veil">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-h">
+      <h3 id="sheetTitle">Post to Legal Ops</h3>
+      <span class="chan" id="sheetChan">#legal-ops</span>
+    </div>
+    <div class="sheet-b">
+      <div class="msg" id="slackMsg"></div>
+      <div class="urg" id="urgToggle" tabindex="0" role="switch" aria-checked="false">
+        <span class="switch"></span>
+        <span>
+          <b id="urgTitle">Mark urgent</b>
+          <small id="urgSub"></small>
+        </span>
+      </div>
+      <div class="quota" id="quota"></div>
+      <div class="pnote" id="sheetNote"></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" id="slackCancel">Cancel</button>
+      <button class="btn ai" id="slackSend">Post to #legal-ops</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Interaction prototype. Nothing here is connected to a real system, no data is stored, and
+  the assistant's answers are scripted rather than generated. Built to show how approval
+  state, routing, and agent decisions can be made legible to the person waiting on a
+  contract. Turn on <b>Product notes</b> to see the reasoning behind each choice.<br>
+  Andr&eacute; Soto &middot; <a href="https://linkedin.com/in/andre-soto">linkedin.com/in/andre-soto</a>
+</footer>
+
+<script>
+"use strict";
+const DAY = 24;
+const URG_CAP = 5;
+
+const seed = () => ([
+  { id:"intake", name:"Intake review", owner:"Marcus Bell", role:"Legal Operations",
+    state:"cleared", hours:9, sla:24,
+    reason:"Counterparty verified against the approved vendor list. Renewal, so no new diligence required." },
+
+  { id:"terms", name:"Standard terms check", owner:"Policy agent", role:"Automated",
+    state:"escalated", hours:2, sla:24, rule:"PLAYBOOK-04",
+    reason:"Reviewed all 41 clauses against the playbook. Twelve of them are required, and eleven are present. The subprocessor clause required by DPA-02 is absent from the counterparty's redline. A missing required clause is not a deviation inside the fallback range, so the agent did not approve and routed the agreement to Legal review.",
+    confidence:"The agent can tell a clause is missing. It cannot tell whether it was dropped on purpose. That call is Legal's." },
+
+  { id:"privacy", name:"Data protection review", owner:"Ines Okafor", role:"Privacy",
+    state:"cleared", hours:31, sla:48,
+    reason:"DPA attached and current. No new categories of personal data compared to the prior term." },
+
+  { id:"legal", name:"Legal review \u00b7 missing clause", owner:"Legal Ops queue", role:"Unassigned",
+    state:"blocked", hours:144, sla:48,
+    block:"Submitted to the Legal Ops queue 6 days ago and never picked up. No counsel is assigned, so there is no one to nudge and nothing to escalate to. Median time in this queue is 1.5 days.",
+    reason:"Needs a human to decide whether the missing subprocessor clause was dropped intentionally in negotiation or left out by mistake." },
+
+  { id:"finance", name:"Finance approval", owner:"Threshold policy", role:"Skipped",
+    state:"skipped", hours:0, sla:0, rule:"FIN-THRESH-2",
+    reason:"Deal value is $184,000, below the $250,000 threshold that requires Finance sign-off on a renewal." },
+
+  { id:"sign", name:"Signature", owner:"Awaiting upstream", role:"Both parties",
+    state:"pending", hours:0, sla:24,
+    reason:"Cannot start until Legal review clears." }
+]);
+
+const LABEL = { cleared:"Cleared", escalated:"Escalated by agent", blocked:"Blocked",
+                review:"In review", skipped:"Skipped by policy", pending:"Not started" };
+
+/* scripted assistant exchanges */
+const ASK = {
+  stuck: {
+    q:"Why is this stuck?",
+    lines:[
+      "The chain is held at <b>Legal review</b>, and the agent put it there on purpose.",
+      "<span class='cite'>PLAYBOOK-04 \u00b7 11 of 12 required clauses present</span>",
+      "The subprocessor clause required by DPA-02 is missing from the counterparty's redline. That is not a deviation the agent is allowed to accept, so it stopped and escalated.",
+      "The delay is not the escalation. It is that the item has sat unassigned in the Legal Ops queue for <b>6 days</b> against a 1.5 day median. There is no owner, so there is nobody to nudge.",
+      "To inquire about status, ask in the #legal-ops channel using the <b>Ask Legal Ops in Slack</b> button."
+    ],
+    acts:[
+      { act:"slackOpen", label:"Ask Legal Ops in Slack", pri:true }
+    ]
+  },
+  prevent: {
+    q:"Ways to prevent this in the future",
+    lines:[
+      "This agreement was delayed awaiting Legal review.",
+      "<span class='cite'>Legal review \u00b7 144h elapsed \u00b7 48h SLA</span>",
+      "Since queries are sent to a Slack channel, there may be methods to automate reminders post-SLA.",
+      "The Legal Ops queue also isn't a step in this workflow today, so the time spent there doesn't show up in cycle time reporting. It may be worth adding.",
+      "If that sounds useful, share it using the <b>Report a workflow problem</b> button."
+    ],
+    acts:[
+      { act:"productOpen", label:"Report a workflow problem", pri:true }
+    ]
+  }
+};
+
+let steps, log, sel, clock, urgent, urgUsed, sheetMode, attachCase;
+let openKey = null, thinking = false, answered = new Set();
+let sent = { slackOpen:0, productOpen:0 }, notice = null;
+const SEND_CAP = 1;
+const SENT_MSG = {
+  slackOpen:"Your question has been submitted to #legal-ops.",
+  productOpen:"Thank you. Your report has been submitted to the workflow team."
+};
+const ME = "Dana Whitfield";
+
+const fmt = h => h === 0 ? "0h" : h < DAY ? h + "h" : ((h/DAY) % 1 === 0 ? h/DAY : (h/DAY).toFixed(1)) + "d";
+const stamp = () => new Date(clock).toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " " +
+                    new Date(clock).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+
+function note(actor, text, detail, kind){
+  clock += 1000 * 60 * (9 + Math.floor(Math.random() * 40));
+  log.unshift({ ts:stamp(), actor, text, detail:detail||"", kind:kind||"", fresh:true });
+}
+
+function drawMeter(){
+  const total = steps.reduce((a,s)=>a+s.hours,0) || 1;
+  const color = { cleared:"var(--cleared)", escalated:"var(--agent)", blocked:"var(--blocked)",
+                  review:"var(--waiting)", skipped:"var(--skipped)", pending:"var(--rule-strong)" };
+  document.getElementById("meter").innerHTML = steps.filter(s=>s.hours>0).map(s=>{
+    const pct = s.hours/total*100;
+    return `<div class="seg ${pct>17?"wide":""}" style="flex:0 0 ${pct}%;background:${color[s.state]}"
+             title="${s.name}: ${fmt(s.hours)}"><span>${s.name} &middot; ${fmt(s.hours)}</span></div>`;
+  }).join("");
+  const days = total/DAY;
+  document.getElementById("mDays").textContent = fmt(total);
+  document.getElementById("axisEnd").textContent = "Today \u00b7 day " + Math.round(days);
+  document.getElementById("benchMark").style.left = Math.min(9/days*100, 99) + "%";
+  const worst = steps.reduce((a,b)=> b.hours>a.hours ? b : a, steps[0]);
+  const over = days - 9;
+  document.getElementById("verdict").innerHTML = over > 0
+    ? `<span style="color:var(--blocked)">${over.toFixed(1)}d over median</span> \u00b7 ${Math.round(worst.hours/total*100)}% of it on ${worst.name.toLowerCase()}`
+    : `<span style="color:var(--cleared)">${Math.abs(over).toFixed(1)}d under median</span>`;
+  const open = steps.find(s=>s.state==="blocked"||s.state==="review") || steps.find(s=>s.state==="pending");
+  document.getElementById("mStage").textContent = open ? LABEL[open.state] : "Executed";
+}
+
+function drawSpine(){
+  document.getElementById("spine").innerHTML = steps.map(s=>{
+    const seg = s.state==="blocked" ? "seg-blocked" : s.state==="escalated" ? "seg-agent"
+              : s.state==="cleared" ? "seg-cleared" : "seg-dashed";
+    const hot = s.sla > 0 && s.hours > s.sla;
+    return `<button class="node ${seg} ${sel===s.id?"sel":""}" data-id="${s.id}" aria-pressed="${sel===s.id}">
+      <span class="dot ${s.state}">${s.state==="cleared"?"\u2713":s.state==="escalated"?"!":""}</span>
+      <span class="node-top">
+        <span><span class="node-name">${s.name}</span><span class="node-owner">${s.owner} \u00b7 ${s.role}</span></span>
+        <span class="dur ${hot?"hot":""}">${s.hours?fmt(s.hours):"\u2014"}${hot?" \u00b7 "+fmt(s.sla)+" SLA":""}</span>
+      </span>
+      <span class="pill p-${s.state}">${LABEL[s.state]}</span></button>`;
+  }).join("");
+  document.querySelectorAll(".node").forEach(n =>
+    n.addEventListener("click", () => { sel = n.dataset.id; openKey = null; notice = null; answered.delete("status"); render(); }));
+}
+
+function getAsk(key, s){
+  if(key !== "status") return ASK[key];
+  const when = s.hours ? fmt(s.hours) + " elapsed" : "no time recorded";
+  return {
+    q:"What happened on this step?",
+    lines:[
+      `<b>${s.name}</b> is ${LABEL[s.state].toLowerCase()}.`,
+      `<span class='cite'>${s.owner} \u00b7 ${when}${s.rule ? " \u00b7 " + s.rule : ""}</span>`,
+      s.reason || "No detail recorded for this step."
+    ],
+    acts:[]
+  };
+}
+
+function receipt(act){
+  let out = "";
+  if(sent[act] >= SEND_CAP) out += `<p class="receipt">Sent \u00b7 ${sent[act]} of ${SEND_CAP}</p>`;
+  if(notice && notice.act === act) out += `<p class="notice">${notice.text}</p>`;
+  return out;
+}
+
+function aiPanel(s){
+  const keys = (s.state === "blocked" || s.state === "escalated")
+    ? ["stuck", "prevent"] : ["status", "prevent"];
+  const rows = keys.map(k => {
+    const a = getAsk(k, s);
+    const isOpen = openKey === k;
+    let block = `<button class="ai-q ${isOpen?"open":""}" data-ask="${k}" aria-expanded="${isOpen}">${a.q}</button>`;
+    if(isOpen && thinking){
+      block += `<div class="thinking">Reading the chain</div>`;
+    } else if(isOpen){
+      block += `<div class="ai-ans">${a.lines.map((l,i)=>
+        `<p class="ln" style="animation-delay:${i*.26}s">${l}</p>`).join("")}</div>`;
+    }
+    if(isOpen && !thinking && a.acts.length){
+      block += `<div class="acts acts-ai">${a.acts.map(b =>
+        `<button class="btn ${b.pri?"ai":""} ${sent[b.act]>=SEND_CAP?"spent":""}" data-act="${b.act}">${b.label}</button>`).join("")}</div>`
+        + a.acts.map(b => receipt(b.act)).join("");
+    }
+    return `<div class="ai-row">${block}</div>`;
+  }).join("");
+
+  return `<div class="ai-box">
+      <div class="ai-h"><span class="dotpulse"></span> Assistant</div>
+      <div class="ai-body">${rows}</div>
+    </div>
+    <div class="pnote"><b>The assistant is a shortcut, not a gate</b>
+      Asking Legal Ops is on the step itself, so nobody has to open the assistant to do the
+      obvious thing. What it adds is the reasoning behind that action and the option to flag
+      the pattern rather than only this one contract. It never acts on its own; every answer
+      ends in a button you press.</div>`;
+}
+
+function drawInsp(){
+  const box = document.getElementById("insp");
+  const s = steps.find(x => x.id === sel);
+  if(!s){ box.innerHTML = `<p class="empty">Select a step to see who holds it, how long they have held it, and what it is waiting on.</p>`; return; }
+
+  let body = `<h3>${s.name}</h3><p class="who">${s.owner} \u00b7 ${s.role}</p>
+    <dl class="kv">
+      <dt>State</dt><dd>${LABEL[s.state]}</dd>
+      <dt>Time held</dt><dd>${s.hours?fmt(s.hours):"\u2014"}${s.sla?" / "+fmt(s.sla)+" SLA":""}</dd>
+      ${s.rule?`<dt>Policy</dt><dd>${s.rule}</dd>`:""}
+    </dl>`;
+
+  if(s.state === "blocked") body += `<div class="reason block"><strong>Why this is blocked</strong>${s.block}</div>`;
+  if(s.state === "escalated"){
+    body += `<div class="reason agent"><strong>What the agent did</strong>${s.reason}
+      <span class="rule-id">Rule ${s.rule} \u00b7 ${s.confidence}</span></div>`;
+  } else if(s.reason){
+    body += `<div class="reason">${s.reason}</div>`;
+  }
+
+  const acts = [];
+  if(s.state === "blocked"){
+    acts.push(`<button class="btn pri ${sent.slackOpen>=SEND_CAP?"spent":""}" data-act="slackOpen">Ask Legal Ops in Slack</button>`);
+  }
+  if(s.state === "pending" && steps.every(x => x.id===s.id || ["cleared","skipped"].includes(x.state)))
+    acts.push(`<button class="btn pri" data-act="execute">Send for signature</button>`);
+  if(acts.length) body += `<div class="acts">${acts.join("")}</div>` + receipt("slackOpen");
+
+  body += aiPanel(s);
+
+  if(s.state === "skipped"){
+    body += `<div class="pnote"><b>Skipped is a decision, not an absence</b>
+      A skipped step still shows, with the rule and the threshold that skipped it. Hiding it
+      makes the chain shorter and the next audit longer, because nobody can prove Finance was
+      meant to be out of the path.</div>`;
+  }
+  if(s.state === "blocked"){
+    body += `<div class="pnote"><b>An unowned queue is worse than a slow person</b>
+      A named approver who is slow can be nudged, covered, or escalated past. A queue with no
+      assignee absorbs the work and returns nothing, and it does not show up in cycle time
+      reporting until someone goes looking for it by hand.</div>`;
+  }
+  if(s.state === "escalated"){
+    body += `<div class="pnote"><b>Refusing is the feature</b>
+      It would be easy to let the agent approve eleven of twelve required clauses and flag the last one for later.
+      The version people trust is the one that stops, says which clause and which rule, and
+      admits the part it cannot judge.</div>`;
+  }
+
+  box.innerHTML = body;
+  box.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => act(b.dataset.act, s)));
+  box.querySelectorAll("[data-ask]").forEach(b => b.addEventListener("click", () => ask(b.dataset.ask)));
+}
+
+function ask(key){
+  notice = null;
+  if(openKey === key){ openKey = null; render(); return; }
+  openKey = key;
+  if(answered.has(key)){ thinking = false; render(); return; }
+  thinking = true;
+  render();
+  const wait = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 900;
+  setTimeout(() => { thinking = false; answered.add(key); render(); }, wait);
+}
+
+/* ---- sheets: two modes, same shell ---- */
+function slackDraft(){
+  const head = urgent ? '<span class="mention">@here</span>\n\n' : '';
+  return head +
+`Hi Legal Ops, checking on MSA-2291, the Redline Analytics renewal.
+
+It was routed here 6 days ago because the DPA-02 subprocessor clause is missing from their redline. Nothing is assigned yet.
+
+The question is small: was that clause dropped intentionally in negotiation, or left out by mistake?
+
+$184,000 renewal, 14 days in flight against a 9 day median.` +
+(urgent ? '\n\nFlagged urgent, so this pages on-call counsel and asks for a reply within 4 hours.' : '');
+}
+
+function productDraft(){
+  return `Suggestion: consider making the Legal Ops queue a tracked step in the approval workflow.
+
+Right now the queue sits between two workflow steps without being one of them, so time spent waiting there isn't captured in cycle time reporting and nothing nudges the channel when a request runs past its SLA.
+
+Possible improvements: a named rotation on the step, a 48h SLA, and automated reminders in #legal-ops once that SLA passes.` +
+(attachCase
+  ? `\n\nAttached example: MSA-2291, Redline Analytics renewal. 6 of 14 days spent unassigned in this queue.`
+  : `\n\nNo example attached.`);
+}
+
+const SHEETS = {
+  slack: {
+    title:"Post to Legal Ops", chan:"#legal-ops", send:"Post to #legal-ops",
+    draft:slackDraft, act:"slackSend",
+    toggleTitle:"Mark urgent",
+    toggleSub:"Notifies on-call counsel and asks for a response within 4 hours instead of the queue default of 2 business days.",
+    note:`<b>Urgency needs a price</b>
+      An urgent flag that costs nothing gets attached to everything, and then the queue is
+      sorted by who clicks hardest rather than by what actually matters. Showing the quota at
+      the moment of the decision is cheaper than building an escalation review board later.`
+  },
+  product: {
+    title:"Report a workflow problem", chan:"Product \u00b7 Workflow", send:"Send report",
+    draft:productDraft, act:"productSend",
+    toggleTitle:"Attach MSA-2291 as a supporting example",
+    toggleSub:"Shares the counterparty name, deal value, and step timings with the Product team.",
+    note:`<b>A request beats a switch</b>
+      The assistant found a workflow problem, and the tempting move is to let the user fix it
+      right there. But a template change touches every agreement the company signs, and the
+      person who noticed is rarely the person who should decide. Routing it as evidence to
+      whoever owns the workflow is slower and correct.`
+  }
+};
+
+function drawSheet(){
+  const cfg = SHEETS[sheetMode];
+  const on = sheetMode === "slack" ? urgent : attachCase;
+  document.getElementById("sheetTitle").textContent = cfg.title;
+  document.getElementById("sheetChan").textContent = cfg.chan;
+  document.getElementById("slackSend").textContent = cfg.send;
+  document.getElementById("slackMsg").innerHTML = cfg.draft();
+  document.getElementById("urgTitle").textContent = cfg.toggleTitle;
+  document.getElementById("urgSub").textContent = cfg.toggleSub;
+  document.getElementById("sheetNote").innerHTML = cfg.note;
+  const t = document.getElementById("urgToggle");
+  t.classList.toggle("on", on);
+  t.setAttribute("aria-checked", String(on));
+  const q = document.getElementById("quota");
+  if(sheetMode === "slack"){
+    const used = urgUsed + (urgent ? 1 : 0);
+    q.style.display = "";
+    q.textContent = `Urgent flags used this quarter: ${used} of ${URG_CAP}`;
+    q.classList.toggle("hot", used >= 4);
+  } else {
+    q.style.display = "none";
+  }
+}
+
+function openSheet(mode){
+  sheetMode = mode; urgent = false; attachCase = true;
+  drawSheet(); document.getElementById("veil").classList.add("on");
+}
+function closeSheet(){ document.getElementById("veil").classList.remove("on"); }
+
+/* ---- actions ---- */
+function act(a, s){
+  const legal = steps.find(x => x.id === "legal");
+  if(a === "slackOpen" || a === "productOpen"){
+    if(sent[a] >= SEND_CAP){ notice = { act:a, text:SENT_MSG[a] }; render(); return; }
+    notice = null;
+    openSheet(a === "slackOpen" ? "slack" : "product");
+    return;
+  }
+
+  if(a === "slackSend"){
+    const wasUrgent = urgent;
+    if(wasUrgent) urgUsed++;
+    sent.slackOpen++; notice = null;
+    closeSheet();
+    legal.state = "review"; legal.owner = "Priya Raman"; legal.role = "Legal Counsel";
+    legal.hours += wasUrgent ? 4 : 16; legal.block = null;
+    legal.reason = "Picked up from the channel. Counsel is confirming whether the subprocessor clause was dropped in negotiation.";
+    note(ME, "posted to #legal-ops on the assistant's recommendation",
+      wasUrgent
+        ? `Marked urgent, which paged on-call counsel and set a 4 hour response expectation. ${urgUsed} of ${URG_CAP} urgent flags used this quarter.`
+        : "Standard priority, 2 business day queue expectation.",
+      "assist");
+    note("Priya Raman", "picked up MSA-2291 from the channel",
+      "Assigned herself from #legal-ops. The item now has an owner for the first time in 6 days.");
+    sel = "legal"; openKey = null; render();
+    setTimeout(() => {
+      legal.state = "cleared"; legal.hours += 3;
+      legal.reason = "Clause was dropped in error during negotiation. Standard DPA-02 language reinstated and accepted by the counterparty.";
+      const sign = steps.find(x => x.id === "sign");
+      if(sign){
+        sign.owner = "Ready to send";
+        sign.reason = "Ready to send. Both signatories are on file.";
+      }
+      note("Priya Raman", "approved Legal review",
+        "Confirmed the omission was a mistake rather than a negotiated position. Reinstated the DPA-02 subprocessor clause.");
+      render();
+    }, 1500);
+    return;
+  }
+
+
+  if(a === "productSend"){
+    closeSheet();
+    sent.productOpen++; notice = null;
+    note(ME, "sent a product request to the workflow team",
+      "Asked for the Legal Ops queue to become a tracked step with a named rotation and a 48h SLA."
+      + (attachCase ? " MSA-2291 attached as a supporting example." : " No example attached."),
+      "assist");
+    openKey = null; render(); return;
+  }
+
+  if(a === "execute"){
+    s.state = "cleared"; s.hours = 6; s.owner = "Signed";
+    s.reason = "Executed by both signatories.";
+    note("Redline Analytics", "countersigned the agreement", "Fully executed. Record MSA-2291 closed.");
+  }
+  render();
+}
+
+function drawLog(){
+  document.getElementById("logCount").textContent = log.length + " entries";
+  document.getElementById("log").innerHTML = log.map(e => `
+    <div class="entry ${e.fresh?"fresh":""}">
+      <time>${e.ts}</time>
+      <p><span class="actor ${e.kind==="auto"?"bot":""}">${e.actor}</span> ${e.text}${
+        e.kind==="auto" ? '<span class="tag auto">agent</span>'
+        : e.kind==="assist" ? '<span class="tag assist">AI-assisted</span>' : ''}
+      ${e.detail?`<small>${e.detail}</small>`:""}</p>
+    </div>`).join("");
+  log.forEach(e => e.fresh = false);
+}
+
+function render(){ drawMeter(); drawSpine(); drawInsp(); drawLog(); }
+
+function boot(){
+  steps = seed(); sel = "legal"; urgent = false; urgUsed = 0;
+  openKey = null; thinking = false; answered = new Set();
+  sent = { slackOpen:0, productOpen:0 }; notice = null;
+  sheetMode = "slack"; attachCase = true;
+  clock = new Date(2026,7,28,9,12).getTime();
+  log = [
+    { ts:"Aug 22 11:02", actor:"Ines Okafor", text:"approved data protection review", detail:"DPA current, no new personal data categories this term." },
+    { ts:"Aug 20 08:15", actor:"Policy agent", text:"escalated MSA-2291 to Legal review", detail:"Reviewed 41 clauses, 12 of them required. Eleven present. DPA-02 subprocessor clause absent from the counterparty redline, which is outside the fallback range.", kind:"auto" },
+    { ts:"Aug 19 17:30", actor:"Finance", text:"skipped under FIN-THRESH-2", detail:"$184,000 is below the $250,000 renewal threshold.", kind:"auto" },
+    { ts:"Aug 14 10:05", actor:"Marcus Bell", text:"cleared intake review", detail:"Counterparty on the approved vendor list. Renewal, no new diligence." },
+    { ts:"Aug 14 09:41", actor:"Dana Whitfield", text:"submitted MSA-2291 for approval", detail:"Renewal of the Redline Analytics master agreement, $184,000 annual value." }
+  ];
+  render();
+}
+
+document.getElementById("reset").addEventListener("click", () => { closeSheet(); boot(); });
+document.getElementById("slackCancel").addEventListener("click", closeSheet);
+document.getElementById("slackSend").addEventListener("click", () => act(SHEETS[sheetMode].act));
+
+document.getElementById("veil").addEventListener("click", e => { if(e.target.id === "veil") closeSheet(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeSheet(); });
+
+const ut = document.getElementById("urgToggle");
+function flipUrg(){
+  if(sheetMode === "slack") urgent = !urgent; else attachCase = !attachCase;
+  drawSheet();
+}
+ut.addEventListener("click", flipUrg);
+ut.addEventListener("keydown", e => { if(e.key===" "||e.key==="Enter"){ e.preventDefault(); flipUrg(); } });
+
+const tg = document.getElementById("notesToggle");
+function flipNotes(){
+  const on = document.body.classList.toggle("notes");
+  tg.classList.toggle("on", on);
+  tg.setAttribute("aria-checked", String(on));
+}
+tg.addEventListener("click", flipNotes);
+tg.addEventListener("keydown", e => { if(e.key===" "||e.key==="Enter"){ e.preventDefault(); flipNotes(); } });
+
+boot();
+</script>
+</body>
+</html>
